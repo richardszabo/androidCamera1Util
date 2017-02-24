@@ -10,6 +10,9 @@ import android.widget.FrameLayout;
 
 import java.io.IOException;
 
+import static android.R.attr.id;
+import static android.graphics.ImageFormat.NV21;
+
 /**
  * Created by rics on 2017.02.08.
  */
@@ -22,9 +25,18 @@ public class MediaRecorderWrapper {
     boolean isRecording;
     static final int CAMERA_ID = 0;
 
-    public MediaRecorderWrapper(Activity activity, int id) {
+    public MediaRecorderWrapper(Activity activity, int viewId, CameraPreview cameraPreview) {
+        this.cameraPreview = cameraPreview;
+        init(activity,viewId);
+    }
+
+    public MediaRecorderWrapper(Activity activity, int viewId) {
         cameraPreview = new CameraPreview(activity);
-        FrameLayout preview = (FrameLayout) activity.findViewById(id);
+        init(activity,viewId);
+    }
+
+    private void init(Activity activity, int viewId) {
+        FrameLayout preview = (FrameLayout) activity.findViewById(viewId);
         preview.addView(cameraPreview);
     }
 
@@ -42,9 +54,11 @@ public class MediaRecorderWrapper {
     public void startRecording(String outputfileName) {
         if (prepareMediaRecorder(outputfileName)) {
             mediaRecorder.start();
+            cameraPreview.startRecording();
 
             isRecording = true;
         } else {
+            cameraPreview.stopRecording();
             releaseMediaRecorder();
             isRecording = false;
         }
@@ -52,6 +66,7 @@ public class MediaRecorderWrapper {
 
     public void stopRecording() {
         // stop recording and release camera
+        cameraPreview.stopRecording();
         mediaRecorder.stop();  // stop the recording
         releaseMediaRecorder(); // release the MediaRecorder object
         camera.lock();         // take camera access back from MediaRecorder
@@ -64,6 +79,9 @@ public class MediaRecorderWrapper {
 
         Log.d(LibraryInfo.TAG, "prep1");
         CamcorderProfile profile;
+        // ugly profile selection:
+        // - SM-T800 has no 480P
+        // - Ace3 has 720P but it hangs
         if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P)) {
             profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
         } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_720P)) {
@@ -80,7 +98,7 @@ public class MediaRecorderWrapper {
         Log.d(LibraryInfo.TAG,"prep3");
         parameters.setPreviewSize(profile.videoFrameWidth,profile.videoFrameHeight);
         Log.d(LibraryInfo.TAG,"prep4");
-        parameters.setPreviewFormat(ImageFormat.NV21);
+        parameters.setPreviewFormat(ImageFormat.NV21); // YUV12 boots Ace3! RGB565 hangs on SM-T800 keeping default format
         Log.d(LibraryInfo.TAG,"prep5");
         camera.setParameters(parameters);
         Log.d(LibraryInfo.TAG,"prep6");

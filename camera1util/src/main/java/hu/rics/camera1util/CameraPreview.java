@@ -12,9 +12,9 @@ import android.view.WindowManager;
  * Created by rics on 2017.02.08.
  */
 @SuppressWarnings( "deprecation" ) // because of the camera
-public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
     private Context context;
-    private Camera camera;
+    protected Camera camera;
     private boolean previewIsRunning;
 
     public CameraPreview(Context context) {
@@ -35,9 +35,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        Log.d(LibraryInfo.TAG,"CameraPreview.surfacecreated");
         try {
             camera.setPreviewDisplay(surfaceHolder);
-            Log.d(LibraryInfo.TAG,"surfacecreated");
         } catch (Exception e) {
             Log.e(LibraryInfo.TAG,e.getMessage(),e);
             // Camera is not available (in use or does not exist)
@@ -46,27 +46,28 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+        Log.d(LibraryInfo.TAG,"CameraPreview.surfacechanged");
         if (previewIsRunning) {
             stopPreview();
         }
         setCameraDisplayOrientation(context,MediaRecorderWrapper.CAMERA_ID,camera);
-
+        camera.setPreviewCallback(this);
         startPreview();
-        Log.d(LibraryInfo.TAG,"surfacechanged---------------------");
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        Log.d(LibraryInfo.TAG,"CameraPreview.surfacedestroyed");
         stopPreview();
         camera.release();
         camera = null;
-        Log.d(LibraryInfo.TAG,"surfacedestroyed");
     }
 
     // safe call to start the preview
     // if this is called in onResume, the surface might not have been created yet
     // so check that the camera has been set up too.
     public void startPreview() {
+        Log.d(LibraryInfo.TAG,"CameraPreview.startPreview");
         if (!previewIsRunning && (camera != null)) {
             camera.startPreview();
             previewIsRunning = true;
@@ -75,10 +76,24 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     // same for stopping the preview
     public void stopPreview() {
+        Log.d(LibraryInfo.TAG,"CameraPreview.stopPreview");
         if (previewIsRunning && (camera != null)) {
             camera.stopPreview();
             previewIsRunning = false;
         }
+    }
+
+    public void startRecording() {
+        Log.d(LibraryInfo.TAG,"CameraPreview.startRecording");
+    }
+
+    public void stopRecording() {
+        Log.d(LibraryInfo.TAG,"CameraPreview.stopRecording");
+    }
+
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
+        Log.d(LibraryInfo.TAG,"CameraPreview.onPreviewFrame");
     }
 
     // correct displayorientation for Ace 3 and SMT800 tab in all four direction
