@@ -93,7 +93,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        Log.d(LibraryInfo.TAG,"CameraPreview.onPreviewFrame");
+        //Log.d(LibraryInfo.TAG,"CameraPreview.onPreviewFrame");
     }
 
     // correct displayorientation for Ace 3 and SMT800 tab in all four direction
@@ -112,7 +112,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             case Surface.ROTATION_180: degrees = 180; break;
             case Surface.ROTATION_270: degrees = 270; break;
         }
-
+        Log.i(LibraryInfo.TAG,"degrees:" + degrees + ":");
         int result;
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;

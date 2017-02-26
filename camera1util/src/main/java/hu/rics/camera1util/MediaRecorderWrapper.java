@@ -82,17 +82,17 @@ public class MediaRecorderWrapper {
         // ugly profile selection:
         // - SM-T800 has no 480P
         // - Ace3 has 720P but it hangs
-        if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P)) {
+        if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P) ) {
             profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
-        } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_720P)) {
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+        } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_HIGH)) {
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
         } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_LOW)) {
             profile = CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
         } else {
             Log.d(LibraryInfo.TAG,"Cannot get camcorderprofile");
             return false;
         }
-        Log.d(LibraryInfo.TAG,"prep2");
+        Log.d(LibraryInfo.TAG,"prep: profile width: " + profile.videoFrameWidth + " height:" + profile.videoFrameHeight);
         //http://stackoverflow.com/a/16543157/21047
         Camera.Parameters parameters = camera.getParameters();
         Log.d(LibraryInfo.TAG,"prep3");
