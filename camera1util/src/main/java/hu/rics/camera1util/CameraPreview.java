@@ -1,5 +1,6 @@
 package hu.rics.camera1util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
 import android.util.Log;
@@ -50,6 +51,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         if (previewIsRunning) {
             stopPreview();
         }
+        Log.d(LibraryInfo.TAG,"orientation: " + getResources().getConfiguration().orientation);
         setCameraDisplayOrientation(context,MediaRecorderWrapper.CAMERA_ID,camera);
         camera.setPreviewCallback(this);
         startPreview();
@@ -98,7 +100,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     // correct displayorientation for Ace 3 and SMT800 tab in all four direction
     // taken from here: http://stackoverflow.com/a/10218309/21047
-    public static void setCameraDisplayOrientation(Context context,
+    public static int getCameraDisplayOrientation(Context context,
                                                    int cameraId, android.hardware.Camera camera) {
         android.hardware.Camera.CameraInfo info =
                 new android.hardware.Camera.CameraInfo();
@@ -112,7 +114,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             case Surface.ROTATION_180: degrees = 180; break;
             case Surface.ROTATION_270: degrees = 270; break;
         }
-        Log.i(LibraryInfo.TAG,"degrees:" + degrees + ":");
+        Log.i(LibraryInfo.TAG,"info orientation:" + info.orientation + " rotation:" + degrees + ":");
         int result;
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
@@ -120,7 +122,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } else {  // back-facing
             result = (info.orientation - degrees + 360) % 360;
         }
-        camera.setDisplayOrientation(result);
+        return result;
+    }
+
+    public static void setCameraDisplayOrientation(Context context,
+                                                   int cameraId, android.hardware.Camera camera) {
+        camera.setDisplayOrientation(getCameraDisplayOrientation(context,cameraId,camera));
     }
 
 }

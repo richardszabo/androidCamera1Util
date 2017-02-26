@@ -19,6 +19,7 @@ import static android.graphics.ImageFormat.NV21;
 @SuppressWarnings( "deprecation" ) // because of the camera
 public class MediaRecorderWrapper {
 
+    Activity activity;
     MediaRecorder mediaRecorder;
     Camera camera;
     CameraPreview cameraPreview;
@@ -36,6 +37,7 @@ public class MediaRecorderWrapper {
     }
 
     private void init(Activity activity, int viewId) {
+        this.activity = activity;
         FrameLayout preview = (FrameLayout) activity.findViewById(viewId);
         preview.addView(cameraPreview);
     }
@@ -109,6 +111,7 @@ public class MediaRecorderWrapper {
 
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mediaRecorder.setOrientationHint(CameraPreview.getCameraDisplayOrientation(activity,CAMERA_ID,camera));
         mediaRecorder.setProfile(profile);
         mediaRecorder.setOutputFile(outputfileName);
 
