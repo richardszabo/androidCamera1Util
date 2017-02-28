@@ -24,7 +24,7 @@ public class MediaRecorderWrapper {
     Camera camera;
     CameraPreview cameraPreview;
     boolean isRecording;
-    static final int CAMERA_ID = 0;
+    public static final int CAMERA_ID = 0;
 
     public MediaRecorderWrapper(Activity activity, int viewId, CameraPreview cameraPreview) {
         this.cameraPreview = cameraPreview;
