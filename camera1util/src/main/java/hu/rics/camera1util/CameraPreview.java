@@ -50,6 +50,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Log.d(LibraryInfo.TAG,"CameraPreview.surfacechanged");
         if (previewIsRunning) {
             stopPreview();
+
         }
         Log.d(LibraryInfo.TAG,"orientation: " + getResources().getConfiguration().orientation);
         setCameraDisplayOrientation(context,MediaRecorderWrapper.CAMERA_ID,camera);
@@ -61,6 +62,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         Log.d(LibraryInfo.TAG,"CameraPreview.surfacedestroyed");
         stopPreview();
+        camera.setPreviewCallback(null);
         camera.release();
         camera = null;
     }
