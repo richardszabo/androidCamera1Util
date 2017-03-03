@@ -92,7 +92,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             previewIsRunning = false;
         }
     }
-    
+
     public void setPreviewSize(int width, int height) {
         Camera.Parameters parameters = camera.getParameters();
         parameters.setPreviewSize(width,height);
