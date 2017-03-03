@@ -9,6 +9,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
+import java.util.List;
+
 /**
  * Created by rics on 2017.02.08.
  */
@@ -73,6 +75,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void startPreview() {
         Log.d(LibraryInfo.TAG,"CameraPreview.startPreview");
         if (!previewIsRunning && (camera != null)) {
+            int i = 0;
+            for( Camera.Size size : camera.getParameters().getSupportedPreviewSizes() ) {
+                Log.i(LibraryInfo.TAG,"Supported preview size" + (++i) + ":" + size.width + ":" + size.height);
+            }
             camera.startPreview();
             previewIsRunning = true;
         }
@@ -85,6 +91,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             camera.stopPreview();
             previewIsRunning = false;
         }
+    }
+    
+    public void setPreviewSize(int width, int height) {
+        Camera.Parameters parameters = camera.getParameters();
+        parameters.setPreviewSize(width,height);
+        camera.setParameters(parameters);
     }
 
     public void startRecording() {

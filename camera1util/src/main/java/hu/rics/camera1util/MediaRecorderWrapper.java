@@ -39,13 +39,13 @@ public class MediaRecorderWrapper {
 
     private void init(Activity activity, int viewId) {
         this.activity = activity;
+        camera=Camera.open(CAMERA_ID); // attempt to get a Camera instance
+        cameraPreview.setCamera(camera);
         FrameLayout preview = (FrameLayout) activity.findViewById(viewId);
         preview.addView(cameraPreview);
     }
 
     public void startPreview() {
-        camera=Camera.open(CAMERA_ID); // attempt to get a Camera instance
-        cameraPreview.setCamera(camera);
         cameraPreview.startPreview();
         isPreview = true;
     }
