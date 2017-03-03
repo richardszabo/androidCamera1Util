@@ -23,6 +23,7 @@ public class MediaRecorderWrapper {
     MediaRecorder mediaRecorder;
     Camera camera;
     CameraPreview cameraPreview;
+    boolean isPreview;
     boolean isRecording;
     public static final int CAMERA_ID = 0;
 
@@ -46,11 +47,13 @@ public class MediaRecorderWrapper {
         camera=Camera.open(CAMERA_ID); // attempt to get a Camera instance
         cameraPreview.setCamera(camera);
         cameraPreview.startPreview();
+        isPreview = true;
     }
 
     public void stopPreview() {
         cameraPreview.stopPreview();
         releaseMediaRecorder();       // if you are using MediaRecorder, release it first
+        isPreview = false;
     }
 
     public void startRecording(String outputfileName) {
@@ -134,6 +137,10 @@ public class MediaRecorderWrapper {
             mediaRecorder.release(); // release the recorder object
             mediaRecorder = null;
         }
+    }
+
+    public boolean isPreview() {
+        return isPreview;
     }
 
     public boolean isRecording() {
