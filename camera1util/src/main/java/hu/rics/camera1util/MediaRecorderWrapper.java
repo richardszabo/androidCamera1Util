@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 import java.io.IOException;
 
 import static android.R.attr.id;
+import static android.content.ContentValues.TAG;
 import static android.graphics.ImageFormat.NV21;
 
 /**
@@ -25,7 +26,10 @@ public class MediaRecorderWrapper {
     CameraPreview cameraPreview;
     boolean isPreview;
     boolean isRecording;
+    boolean isTimelapse;
     public static final int CAMERA_ID = 0;
+    int DEFAULT_FRAME_RATE = 30;
+    int frameRate = DEFAULT_FRAME_RATE;
 
     public MediaRecorderWrapper(Activity activity, int viewId, CameraPreview cameraPreview) {
         this.cameraPreview = cameraPreview;
@@ -83,17 +87,8 @@ public class MediaRecorderWrapper {
         mediaRecorder = new MediaRecorder();
 
         Log.d(LibraryInfo.TAG, "prep1");
-        CamcorderProfile profile;
-        // ugly profile selection:
-        // - SM-T800 has no 480P
-        // - Ace3 has 720P but it hangs
-        if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P) ) {
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
-        } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_HIGH)) {
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
-        } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_LOW)) {
-            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
-        } else {
+        CamcorderProfile profile = getAppropriateProfile();
+        if( profile == null ) {
             Log.d(LibraryInfo.TAG,"Cannot get camcorderprofile");
             return false;
         }
@@ -120,6 +115,8 @@ public class MediaRecorderWrapper {
 
         mediaRecorder.setPreviewDisplay(cameraPreview.getHolder().getSurface());
 
+        mediaRecorder.setCaptureRate(getFrameRate());
+
         try {
             mediaRecorder.prepare();
         } catch (IllegalStateException | IOException e) {
@@ -129,6 +126,44 @@ public class MediaRecorderWrapper {
         }
         Log.d(LibraryInfo.TAG, "prepareMediaRecorder ready++++++!!!!!!!!!!!");
         return true;
+    }
+
+    private CamcorderProfile getAppropriateProfile() {
+        if( isTimelapse() ) {
+            return getAppropriateTimelapseProfile();
+        } else {
+            return getAppropriateNormalProfile();
+        }
+        // TODO handle HIGH SPEED profiles
+    }
+
+    private CamcorderProfile getAppropriateNormalProfile() {
+        CamcorderProfile profile;
+        // ugly profile selection:
+        // - SM-T800 has no 480P
+        // - Ace3 has 720P but it hangs
+        if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P) ) {
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
+        } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_HIGH)) {
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_LOW)) {
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
+        } else {
+            Log.d(LibraryInfo.TAG,"Cannot get normal camcorderprofile");
+            profile = null;
+        }
+        return profile;
+    }
+
+    private CamcorderProfile getAppropriateTimelapseProfile() {
+        CamcorderProfile profile;
+        if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_TIME_LAPSE_720P) ) {
+            profile = CamcorderProfile.get(CamcorderProfile.QUALITY_TIME_LAPSE_720P );
+        } else {
+            Log.d(LibraryInfo.TAG,"Cannot get timelapse camcorderprofile");
+            profile = null;
+        }
+        return profile;
     }
 
     private void releaseMediaRecorder() {
@@ -145,5 +180,31 @@ public class MediaRecorderWrapper {
 
     public boolean isRecording() {
         return isRecording;
+    }
+
+    public void setTimelapse (boolean isTimelapse) {
+        this.isTimelapse = isTimelapse;
+    }
+
+    public void setFrameRateIfPossible(int frameRate) {
+        if( !checkIfFrameRateIsTooLarge(frameRate) ) {
+            this.frameRate = frameRate;
+        } else {
+            Log.d(LibraryInfo.TAG,"Frame rate is too large:" + frameRate );
+        }
+    }
+
+    boolean checkIfFrameRateIsTooLarge(int frameRate) {
+        Camera.Parameters parameters = camera.getParameters();
+        int fpsRange[] = new int[2];
+        parameters.getPreviewFpsRange(fpsRange);
+        Log.d(LibraryInfo.TAG,"Maximal frame rate:" + fpsRange[1]);
+        return frameRate > fpsRange[1];
+    }
+
+    public int getFrameRate() { return frameRate; }
+
+    public boolean isTimelapse() {
+        return isTimelapse;
     }
 }
