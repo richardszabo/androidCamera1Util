@@ -28,8 +28,8 @@ public class MediaRecorderWrapper {
     boolean isRecording;
     boolean isTimelapse;
     public static final int CAMERA_ID = 0;
-    int DEFAULT_FRAME_RATE = 30;
-    int frameRate = DEFAULT_FRAME_RATE;
+    double DEFAULT_FRAME_RATE = 30f;
+    double frameRate = DEFAULT_FRAME_RATE;
 
     public MediaRecorderWrapper(Activity activity, int viewId, CameraPreview cameraPreview) {
         this.cameraPreview = cameraPreview;
@@ -111,6 +111,9 @@ public class MediaRecorderWrapper {
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mediaRecorder.setOrientationHint(CameraPreview.getCameraDisplayOrientation(activity,CAMERA_ID,camera));
         mediaRecorder.setProfile(profile);
+        if( isTimelapse() ) {
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+        }
         mediaRecorder.setOutputFile(outputfileName);
 
         mediaRecorder.setPreviewDisplay(cameraPreview.getHolder().getSurface());
@@ -186,15 +189,17 @@ public class MediaRecorderWrapper {
         this.isTimelapse = isTimelapse;
     }
 
-    public void setFrameRateIfPossible(int frameRate) {
-        if( !checkIfFrameRateIsTooLarge(frameRate) ) {
+    public boolean setFrameRateIfPossible(double frameRate) {
+        boolean success = !checkIfFrameRateIsTooLarge(frameRate);
+        if( success ) {
             this.frameRate = frameRate;
         } else {
             Log.d(LibraryInfo.TAG,"Frame rate is too large:" + frameRate );
         }
+        return success;
     }
 
-    boolean checkIfFrameRateIsTooLarge(int frameRate) {
+    boolean checkIfFrameRateIsTooLarge(double frameRate) {
         Camera.Parameters parameters = camera.getParameters();
         int fpsRange[] = new int[2];
         parameters.getPreviewFpsRange(fpsRange);
@@ -202,9 +207,24 @@ public class MediaRecorderWrapper {
         return frameRate > fpsRange[1];
     }
 
-    public int getFrameRate() { return frameRate; }
+    public double getFrameRate() { return frameRate; }
 
     public boolean isTimelapse() {
         return isTimelapse;
+    }
+
+    public String profileToString(CamcorderProfile cp) {
+        return "audioBitRate:" + cp.audioBitRate + ":" +
+                "audioChannels:" +cp.audioChannels + ":" +
+                "audioCodec:" + cp.audioCodec + ":" +
+                "audioSampleRate:" + cp.audioSampleRate + ":" +
+                "duration:" + cp.duration + ":" +
+                "fileFormat:" + cp.fileFormat + ":" +
+                "quality:" + cp.quality + ":" +
+                "videoBitRate:" + cp.videoBitRate + ":" +
+                "videoCodec:" + cp.videoCodec + ":" +
+                "videoFrameHeight:" + cp.videoFrameHeight + ":" +
+                "videoFrameRate:" + cp.videoFrameRate + ":" +
+                "videoFrameWidth:" + cp.videoFrameWidth +":";
     }
 }
